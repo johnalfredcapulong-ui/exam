@@ -12,6 +12,7 @@ let examState = {
 let currentQuestion = null;
 let targetRGB = { r: 0, g: 0, b: 0 };
 let userRGB = { r: 128, g: 128, b: 128 };
+let isProcessingAnswer = false; // Prevents spam clicking
 
 // DOM Elements
 const loginScreen = document.getElementById('login-screen');
@@ -27,6 +28,7 @@ const questionTextEl = document.getElementById('question-text');
 const questionInstructionEl = document.getElementById('question-instruction');
 const answerForm = document.getElementById('answer-form');
 const answerInput = document.getElementById('answer-input');
+const submitAnswerBtn = document.getElementById('submit-answer-btn');
 const feedbackMsg = document.getElementById('feedback-msg');
 
 const targetColorBox = document.getElementById('target-color-box');
@@ -41,6 +43,10 @@ const submitColorBtn = document.getElementById('submit-color-btn');
 const colorResult = document.getElementById('color-result');
 const colorScoreDisplay = document.getElementById('color-score-display');
 const colorFinalMsg = document.getElementById('color-final-msg');
+
+const completionModal = document.getElementById('completion-modal');
+const modalSummaryText = document.getElementById('modal-summary-text');
+const closeModalBtn = document.getElementById('close-modal-btn');
 
 const TOTAL_QUESTIONS = 20;
 
@@ -106,10 +112,7 @@ function generateQuestion(index) {
     let instruction = "";
     let correctAnswer = "";
 
-    // Random Decimal between 32 and 127 (Standard ASCII printable range)
     const randomDec = Math.floor(Math.random() * (127 - 32 + 1)) + 32;
-    
-    // Random printable ASCII character from the same range
     const randomCharCode = Math.floor(Math.random() * (127 - 32 + 1)) + 32;
     const randomChar = String.fromCharCode(randomCharCode);
 
@@ -160,6 +163,8 @@ function loadQuestion() {
     questionTextEl.textContent = currentQuestion.questionText;
     answerInput.value = '';
     answerInput.disabled = false;
+    submitAnswerBtn.disabled = false; // Re-enable button
+    isProcessingAnswer = false;       // Reset processing flag
     feedbackMsg.textContent = '';
     feedbackMsg.className = '';
     answerInput.focus();
@@ -168,10 +173,19 @@ function loadQuestion() {
 // --- ANSWER VALIDATION ---
 answerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const userAnswer = answerInput.value.trim();
-    if (!userAnswer) return;
+    
+    // 1. BLOCK SPAM CLICKING
+    if (isProcessingAnswer) return;
+    isProcessingAnswer = true;
+    submitAnswerBtn.disabled = true; // Instantly disable button
 
-    // Case-insensitive comparison
+    const userAnswer = answerInput.value.trim();
+    if (!userAnswer) {
+        isProcessingAnswer = false;
+        submitAnswerBtn.disabled = false;
+        return;
+    }
+
     if (userAnswer.toLowerCase() === currentQuestion.correctAnswer.toLowerCase()) {
         feedbackMsg.textContent = "Correct! Loading next question...";
         feedbackMsg.className = "correct";
@@ -192,6 +206,10 @@ answerForm.addEventListener('submit', async (e) => {
         feedbackMsg.className = "wrong";
         answerInput.value = '';
         answerInput.focus();
+        
+        // 2. UNBLOCK ON INCORRECT
+        isProcessingAnswer = false;
+        submitAnswerBtn.disabled = false;
     }
 });
 
@@ -261,7 +279,10 @@ redSlider.addEventListener('input', updateUserColor);
 greenSlider.addEventListener('input', updateUserColor);
 blueSlider.addEventListener('input', updateUserColor);
 
+// --- SUBMIT COLOR & SHOW FINAL MODAL ---
 submitColorBtn.addEventListener('click', async () => {
+    submitColorBtn.disabled = true;
+
     const rDiff = targetRGB.r - userRGB.r;
     const gDiff = targetRGB.g - userRGB.g;
     const bDiff = targetRGB.b - userRGB.b;
@@ -281,17 +302,26 @@ submitColorBtn.addEventListener('click', async () => {
 
     if (error) console.error("Error saving color score:", error);
 
-    submitColorBtn.disabled = true;
+    // Show result box
     colorResult.classList.remove('hidden');
     colorScoreDisplay.textContent = `Color Score: ${score}%`;
     
     if (score === 100) {
-        colorFinalMsg.textContent = "Perfect Match! 🎯";
+        colorFinalMsg.textContent = "Perfect Match!";
     } else if (score >= 90) {
-        colorFinalMsg.textContent = "Excellent eye! 👏";
+        colorFinalMsg.textContent = "Excellent eye!";
     } else if (score >= 70) {
-        colorFinalMsg.textContent = "Pretty close! 👍";
+        colorFinalMsg.textContent = "Pretty close!";
     } else {
-        colorFinalMsg.textContent = "Not quite, but good effort! 🎨";
+        colorFinalMsg.textContent = "Good effort!";
     }
+
+    // Show the final Pop-Up
+    modalSummaryText.textContent = `You scored ${examState.examScore} / ${TOTAL_QUESTIONS} on the conversion questions, and ${score}% on the color match. Your results have been saved.`;
+    completionModal.classList.remove('hidden');
+});
+
+// Close Modal Button
+closeModalBtn.addEventListener('click', () => {
+    completionModal.classList.add('hidden');
 });
