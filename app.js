@@ -12,7 +12,7 @@ let examState = {
 let currentQuestion = null;
 let targetRGB = { r: 0, g: 0, b: 0 };
 let userRGB = { r: 128, g: 128, b: 128 };
-let isProcessingAnswer = false; // Prevents spam clicking
+let isProcessingAnswer = false; 
 
 // DOM Elements
 const loginScreen = document.getElementById('login-screen');
@@ -163,8 +163,8 @@ function loadQuestion() {
     questionTextEl.textContent = currentQuestion.questionText;
     answerInput.value = '';
     answerInput.disabled = false;
-    submitAnswerBtn.disabled = false; // Re-enable button
-    isProcessingAnswer = false;       // Reset processing flag
+    submitAnswerBtn.disabled = false; 
+    isProcessingAnswer = false;       
     feedbackMsg.textContent = '';
     feedbackMsg.className = '';
     answerInput.focus();
@@ -174,10 +174,9 @@ function loadQuestion() {
 answerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // 1. BLOCK SPAM CLICKING
     if (isProcessingAnswer) return;
     isProcessingAnswer = true;
-    submitAnswerBtn.disabled = true; // Instantly disable button
+    submitAnswerBtn.disabled = true; 
 
     const userAnswer = answerInput.value.trim();
     if (!userAnswer) {
@@ -188,7 +187,7 @@ answerForm.addEventListener('submit', async (e) => {
 
     if (userAnswer.toLowerCase() === currentQuestion.correctAnswer.toLowerCase()) {
         feedbackMsg.textContent = "Correct! Loading next question...";
-        feedbackMsg.className = "correct";
+        feedbackMsg.className = "feedback correct";
         answerInput.disabled = true;
 
         examState.examScore += 1;
@@ -203,11 +202,10 @@ answerForm.addEventListener('submit', async (e) => {
 
     } else {
         feedbackMsg.textContent = "Incorrect. Try again!";
-        feedbackMsg.className = "wrong";
+        feedbackMsg.className = "feedback wrong";
         answerInput.value = '';
         answerInput.focus();
         
-        // 2. UNBLOCK ON INCORRECT
         isProcessingAnswer = false;
         submitAnswerBtn.disabled = false;
     }
@@ -302,7 +300,6 @@ submitColorBtn.addEventListener('click', async () => {
 
     if (error) console.error("Error saving color score:", error);
 
-    // Show result box
     colorResult.classList.remove('hidden');
     colorScoreDisplay.textContent = `Color Score: ${score}%`;
     
@@ -316,12 +313,10 @@ submitColorBtn.addEventListener('click', async () => {
         colorFinalMsg.textContent = "Good effort!";
     }
 
-    // Show the final Pop-Up
     modalSummaryText.textContent = `You scored ${examState.examScore} / ${TOTAL_QUESTIONS} on the conversion questions, and ${score}% on the color match. Your results have been saved.`;
     completionModal.classList.remove('hidden');
 });
 
-// Close Modal Button
 closeModalBtn.addEventListener('click', () => {
     completionModal.classList.add('hidden');
 });

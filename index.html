@@ -23,17 +23,17 @@
     <!-- EXAM SCREEN -->
     <div id="exam-screen" class="container hidden">
         <div class="header">
-            <h2>Welcome, <span id="student-name-display"></span>!</h2>
+            <h2>Welcome, <span id="student-name-display"></span></h2>
             <div class="score-board">Score: <span id="current-score">0</span></div>
         </div>
         <div id="question-area">
             <h3 id="question-text">Loading...</h3>
-            <p id="question-instruction" style="color: #888; font-size: 0.9rem; margin-top: 5px;"></p>
-            <form id="answer-form" style="margin-top: 25px;">
+            <p id="question-instruction" class="instruction-text"></p>
+            <form id="answer-form">
                 <input type="text" id="answer-input" placeholder="Your answer..." autocomplete="off" required>
                 <button type="submit" id="submit-answer-btn">Submit Answer</button>
             </form>
-            <p id="feedback-msg" style="margin-top: 15px; font-weight: bold; min-height: 24px;"></p>
+            <p id="feedback-msg" class="feedback"></p>
         </div>
     </div>
 
@@ -69,15 +69,15 @@
             </div>
         </div>
 
-        <button id="submit-color-btn" style="margin-top: 20px;">Submit Color</button>
+        <button id="submit-color-btn">Submit Color</button>
         
-        <div id="color-result" class="hidden" style="margin-top: 20px;">
+        <div id="color-result" class="hidden">
             <h2 id="color-score-display"></h2>
             <p id="color-final-msg"></p>
         </div>
     </div>
 
-    <!-- FINAL COMPLETION MODAL (POP UP) -->
+    <!-- FINAL COMPLETION MODAL -->
     <div id="completion-modal" class="modal-overlay hidden">
         <div class="modal-box">
             <h2>Exam Completed</h2>
