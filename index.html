@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Binary Conversion Exam</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Supabase Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 </head>
 <body>
@@ -14,12 +13,10 @@
     <div id="login-screen" class="container">
         <h1>Exam Login</h1>
         <p>Please enter your unique passcode to begin.</p>
-        
         <form id="login-form">
             <input type="text" id="passcode-input" placeholder="Enter Passcode (e.g., STUDENT01)" required autocomplete="off">
             <button type="submit" id="login-btn">Start Exam</button>
         </form>
-        
         <p id="login-error" class="error-msg"></p>
     </div>
 
@@ -27,20 +24,15 @@
     <div id="exam-screen" class="container hidden">
         <div class="header">
             <h2>Welcome, <span id="student-name-display"></span>!</h2>
-            <div class="score-board">
-                Score: <span id="current-score">0</span>
-            </div>
+            <div class="score-board">Score: <span id="current-score">0</span></div>
         </div>
-        
         <div id="question-area">
             <h3 id="question-text">Loading...</h3>
             <p id="question-instruction" style="color: #888; font-size: 0.9rem; margin-top: 5px;"></p>
-            
             <form id="answer-form" style="margin-top: 25px;">
                 <input type="text" id="answer-input" placeholder="Your answer..." autocomplete="off" required>
                 <button type="submit" id="submit-btn">Submit Answer</button>
             </form>
-            
             <p id="feedback-msg" style="margin-top: 15px; font-weight: bold; min-height: 24px;"></p>
         </div>
     </div>
@@ -48,7 +40,7 @@
     <!-- COLOR GAME SCREEN -->
     <div id="color-game-screen" class="container hidden">
         <h1>🎨 Color Match Challenge</h1>
-        <p>Match the target color on the left as closely as you can!</p>
+        <p>Match the target color on the left by adjusting the RGB sliders on the right.</p>
         
         <div class="color-game-container">
             <div class="color-box-wrapper">
@@ -58,7 +50,23 @@
             
             <div class="color-box-wrapper">
                 <p>Your Color</p>
-                <input type="color" id="color-picker" class="color-picker">
+                <div id="user-color-preview" class="color-box"></div>
+            </div>
+        </div>
+
+        <!-- RGB Sliders -->
+        <div class="sliders-container">
+            <div class="slider-group">
+                <label for="red-slider">Red: <span id="red-val">128</span></label>
+                <input type="range" id="red-slider" min="0" max="255" value="128">
+            </div>
+            <div class="slider-group">
+                <label for="green-slider">Green: <span id="green-val">128</span></label>
+                <input type="range" id="green-slider" min="0" max="255" value="128">
+            </div>
+            <div class="slider-group">
+                <label for="blue-slider">Blue: <span id="blue-val">128</span></label>
+                <input type="range" id="blue-slider" min="0" max="255" value="128">
             </div>
         </div>
 
@@ -70,7 +78,6 @@
         </div>
     </div>
 
-    <!-- Your Scripts -->
     <script src="supabase.js"></script>
     <script src="app.js"></script>
 </body>

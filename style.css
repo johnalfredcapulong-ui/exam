@@ -21,7 +21,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     width: 100%;
-    max-width: 600px;
+    max-width: 650px;
     text-align: center;
 }
 
@@ -107,13 +107,13 @@ button:disabled {
     color: #2980b9;
 }
 
-/* Exam Question Styles */
 #question-text {
     font-size: 1.5rem;
     color: #2c3e50;
     margin-bottom: 5px;
     font-family: 'Courier New', monospace;
     letter-spacing: 2px;
+    word-break: break-all;
 }
 
 #answer-form input[type="text"] {
@@ -146,27 +146,31 @@ button:disabled {
 
 .color-box {
     width: 100%;
-    height: 150px;
+    height: 120px;
     border-radius: 12px;
     border: 3px solid #eee;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
 }
 
-.color-picker {
-    width: 100%;
-    height: 150px;
-    border: 3px solid #eee;
-    border-radius: 12px;
-    cursor: pointer;
-    padding: 0;
-    background: none;
+/* RGB Sliders */
+.sliders-container {
+    margin-top: 30px;
+    text-align: left;
 }
 
-/* Hide default color input styling in some browsers */
-.color-picker::-webkit-color-swatch-wrapper {
-    padding: 0;
+.slider-group {
+    margin-bottom: 15px;
 }
-.color-picker::-webkit-color-swatch {
-    border: none;
-    border-radius: 8px;
+
+.slider-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.slider-group input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+    accent-color: #3498db;
 }

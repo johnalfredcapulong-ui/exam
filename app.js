@@ -11,6 +11,7 @@ let examState = {
 
 let currentQuestion = null;
 let targetRGB = { r: 0, g: 0, b: 0 };
+let userRGB = { r: 128, g: 128, b: 128 };
 
 // DOM Elements
 const loginScreen = document.getElementById('login-screen');
@@ -29,13 +30,19 @@ const answerInput = document.getElementById('answer-input');
 const feedbackMsg = document.getElementById('feedback-msg');
 
 const targetColorBox = document.getElementById('target-color-box');
-const colorPicker = document.getElementById('color-picker');
+const userColorPreview = document.getElementById('user-color-preview');
+const redSlider = document.getElementById('red-slider');
+const greenSlider = document.getElementById('green-slider');
+const blueSlider = document.getElementById('blue-slider');
+const redVal = document.getElementById('red-val');
+const greenVal = document.getElementById('green-val');
+const blueVal = document.getElementById('blue-val');
 const submitColorBtn = document.getElementById('submit-color-btn');
 const colorResult = document.getElementById('color-result');
 const colorScoreDisplay = document.getElementById('color-score-display');
 const colorFinalMsg = document.getElementById('color-final-msg');
 
-const TOTAL_QUESTIONS = 10;
+const TOTAL_QUESTIONS = 20;
 
 // --- LOGIN LOGIC ---
 loginForm.addEventListener('submit', async (e) => {
@@ -81,7 +88,6 @@ loginForm.addEventListener('submit', async (e) => {
 function showExamScreen() {
     loginScreen.classList.add('hidden');
     
-    // If exam is completed, go straight to color game
     if (examState.isCompleted) {
         startColorGame();
         return;
@@ -93,27 +99,30 @@ function showExamScreen() {
     loadQuestion();
 }
 
-// --- QUESTION GENERATION ---
+// --- QUESTION GENERATION (ASCII Range 32-127) ---
 function generateQuestion(index) {
     const typeIndex = index % 6;
     let questionText = "";
     let instruction = "";
     let correctAnswer = "";
 
-    const randomDec = Math.floor(Math.random() * 200) + 1;
-    const randomCharCode = Math.floor(Math.random() * 26) + 65;
+    // Random Decimal between 32 and 127 (Standard ASCII printable range)
+    const randomDec = Math.floor(Math.random() * (127 - 32 + 1)) + 32;
+    
+    // Random printable ASCII character from the same range
+    const randomCharCode = Math.floor(Math.random() * (127 - 32 + 1)) + 32;
     const randomChar = String.fromCharCode(randomCharCode);
 
     switch(typeIndex) {
         case 0: // Binary -> Decimal
-            questionText = randomDec.toString(2);
+            questionText = randomDec.toString(2).padStart(8, '0');
             instruction = "Convert this Binary number to Decimal:";
             correctAnswer = randomDec.toString();
             break;
         case 1: // Decimal -> Binary
             questionText = randomDec.toString();
-            instruction = "Convert this Decimal number to Binary:";
-            correctAnswer = randomDec.toString(2);
+            instruction = "Convert this Decimal number to Binary (8 bits):";
+            correctAnswer = randomDec.toString(2).padStart(8, '0');
             break;
         case 2: // Binary -> ASCII
             questionText = randomCharCode.toString(2).padStart(8, '0');
@@ -162,6 +171,7 @@ answerForm.addEventListener('submit', async (e) => {
     const userAnswer = answerInput.value.trim();
     if (!userAnswer) return;
 
+    // Case-insensitive comparison
     if (userAnswer.toLowerCase() === currentQuestion.correctAnswer.toLowerCase()) {
         feedbackMsg.textContent = "Correct! Loading next question...";
         feedbackMsg.className = "correct";
@@ -210,7 +220,6 @@ async function finishExam() {
     
     if (error) console.error("Error finishing exam:", error);
     
-    // Transition to Color Game
     startColorGame();
 }
 
@@ -219,47 +228,52 @@ function startColorGame() {
     examScreen.classList.add('hidden');
     colorGameScreen.classList.remove('hidden');
 
-    // Generate random target RGB
     targetRGB = {
         r: Math.floor(Math.random() * 256),
         g: Math.floor(Math.random() * 256),
         b: Math.floor(Math.random() * 256)
     };
 
-    // Apply target color to the box
     targetColorBox.style.backgroundColor = `rgb(${targetRGB.r}, ${targetRGB.g}, ${targetRGB.b})`;
     
-    // Reset color picker to a neutral value
-    colorPicker.value = '#808080';
+    redSlider.value = 128;
+    greenSlider.value = 128;
+    blueSlider.value = 128;
+    updateUserColor();
+
     colorResult.classList.add('hidden');
     submitColorBtn.disabled = false;
 }
 
-submitColorBtn.addEventListener('click', async () => {
-    // Get user picked color
-    const hex = colorPicker.value;
-    const userRGB = {
-        r: parseInt(hex.substr(1, 2), 16),
-        g: parseInt(hex.substr(3, 2), 16),
-        b: parseInt(hex.substr(5, 2), 16)
-    };
+function updateUserColor() {
+    userRGB.r = parseInt(redSlider.value);
+    userRGB.g = parseInt(greenSlider.value);
+    userRGB.b = parseInt(blueSlider.value);
 
-    // Calculate Euclidean distance
+    redVal.textContent = userRGB.r;
+    greenVal.textContent = userRGB.g;
+    blueVal.textContent = userRGB.b;
+
+    userColorPreview.style.backgroundColor = `rgb(${userRGB.r}, ${userRGB.g}, ${userRGB.b})`;
+}
+
+redSlider.addEventListener('input', updateUserColor);
+greenSlider.addEventListener('input', updateUserColor);
+blueSlider.addEventListener('input', updateUserColor);
+
+submitColorBtn.addEventListener('click', async () => {
     const rDiff = targetRGB.r - userRGB.r;
     const gDiff = targetRGB.g - userRGB.g;
     const bDiff = targetRGB.b - userRGB.b;
     const distance = Math.sqrt(rDiff*rDiff + gDiff*gDiff + bDiff*bDiff);
 
-    // Maximum distance in RGB space is sqrt(3 * 255^2) ≈ 441.67
     const maxDistance = Math.sqrt(3 * (255 * 255));
     
-    // Calculate Score (100% = exact match, 0% = furthest possible)
     let score = Math.max(0, 100 - (distance / maxDistance) * 100);
     score = Math.round(score);
 
     examState.colorScore = score;
 
-    // Save to Supabase
     const { error } = await supabaseClient
         .from('exam_results')
         .update({ color_score: score })
@@ -267,7 +281,6 @@ submitColorBtn.addEventListener('click', async () => {
 
     if (error) console.error("Error saving color score:", error);
 
-    // Show results
     submitColorBtn.disabled = true;
     colorResult.classList.remove('hidden');
     colorScoreDisplay.textContent = `Color Score: ${score}%`;
