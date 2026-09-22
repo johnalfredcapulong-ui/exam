@@ -105,16 +105,22 @@ function showExamScreen() {
     loadQuestion();
 }
 
-// --- QUESTION GENERATION (ASCII Range 32-127) ---
+// --- QUESTION GENERATION (ASCII Range 32-127, includes Space and DEL) ---
 function generateQuestion(index) {
     const typeIndex = index % 6;
     let questionText = "";
     let instruction = "";
     let correctAnswer = "";
 
+    // Full ASCII range 32 (Space) to 127 (DEL)
     const randomDec = Math.floor(Math.random() * (127 - 32 + 1)) + 32;
     const randomCharCode = Math.floor(Math.random() * (127 - 32 + 1)) + 32;
     const randomChar = String.fromCharCode(randomCharCode);
+
+    // Create a visible label for invisible characters
+    let displayChar = randomChar;
+    if (randomCharCode === 32) displayChar = '[SPACE]';
+    if (randomCharCode === 127) displayChar = '[DEL]';
 
     switch(typeIndex) {
         case 0: // Binary -> Decimal
@@ -122,28 +128,49 @@ function generateQuestion(index) {
             instruction = "Convert this Binary number to Decimal:";
             correctAnswer = randomDec.toString();
             break;
+
         case 1: // Decimal -> Binary
             questionText = randomDec.toString();
             instruction = "Convert this Decimal number to Binary (8 bits):";
             correctAnswer = randomDec.toString(2).padStart(8, '0');
             break;
+
         case 2: // Binary -> ASCII
             questionText = randomCharCode.toString(2).padStart(8, '0');
             instruction = "Convert this Binary to its ASCII Character:";
-            correctAnswer = randomChar;
+            if (randomCharCode === 32) {
+                instruction += ' (Type "SPACE")';
+                correctAnswer = 'space';
+            } else if (randomCharCode === 127) {
+                instruction += ' (Type "DEL")';
+                correctAnswer = 'del';
+            } else {
+                correctAnswer = randomChar;
+            }
             break;
+
         case 3: // ASCII -> Binary
-            questionText = randomChar;
+            questionText = displayChar;
             instruction = "Convert this ASCII Character to Binary (8 bits):";
             correctAnswer = randomCharCode.toString(2).padStart(8, '0');
             break;
+
         case 4: // Decimal -> ASCII
             questionText = randomCharCode.toString();
             instruction = "Convert this Decimal to its ASCII Character:";
-            correctAnswer = randomChar;
+            if (randomCharCode === 32) {
+                instruction += ' (Type "SPACE")';
+                correctAnswer = 'space';
+            } else if (randomCharCode === 127) {
+                instruction += ' (Type "DEL")';
+                correctAnswer = 'del';
+            } else {
+                correctAnswer = randomChar;
+            }
             break;
+
         case 5: // ASCII -> Decimal
-            questionText = randomChar;
+            questionText = displayChar;
             instruction = "Convert this ASCII Character to Decimal:";
             correctAnswer = randomCharCode.toString();
             break;
@@ -185,7 +212,11 @@ answerForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    if (userAnswer.toLowerCase() === currentQuestion.correctAnswer.toLowerCase()) {
+    // Normalize both for comparison
+    const userLower = userAnswer.toLowerCase();
+    const correctLower = currentQuestion.correctAnswer.toLowerCase();
+
+    if (userLower === correctLower) {
         feedbackMsg.textContent = "Correct! Loading next question...";
         feedbackMsg.className = "feedback correct";
         answerInput.disabled = true;
