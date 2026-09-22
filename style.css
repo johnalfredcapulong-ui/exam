@@ -80,10 +80,14 @@ input[type="text"] {
     color: var(--text-primary);
     margin-bottom: 20px;
     text-align: center;
-    text-transform: uppercase;
     transition: all 0.2s ease;
     font-family: var(--font-mono);
     letter-spacing: 1px;
+}
+
+/* Passcode input only: force uppercase for cleaner look */
+#passcode-input {
+    text-transform: uppercase;
 }
 
 input[type="text"]:focus {
